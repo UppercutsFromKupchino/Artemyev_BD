@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+    <div class="cap-links">
+        <a href="{{ url_for('login') }}">Авторизация</a>
+        <a href="{{ url_for('register') }}">Регистрация</a>
+        <a href="{{ url_for('request') }}">Оставить заявку</a>
+        {% if session['loggedin'] %}
+        <a href="{{ url_for('logout') }}">Выйти из системы</a>
+        {% endif %}
+    </div>
+    <hr>
+    <div>
+        <h2>Главная страница</h2>
+        <p>Бла бла бла</p>
+    </div>
+</body>
+</html>
