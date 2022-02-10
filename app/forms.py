@@ -4,21 +4,33 @@ from wtforms.validators import DataRequired
 
 
 class LoginForm(FlaskForm):
-    login_loginform = StringField("Введите логин", validators=[DataRequired()])
-    password_loginform = PasswordField("Введите пароль", validators=[DataRequired()])
+
+    login_loginform = StringField(validators=[DataRequired()])
+    password_loginform = PasswordField(validators=[DataRequired()])
+    submit_loginform = SubmitField("Авторизируйтесь")
+
+
+class LoginMoreThanOneForm(FlaskForm):
+
+    login_loginform = StringField(validators=[DataRequired()])
+    password_loginform = PasswordField(validators=[DataRequired()])
+    select_role_field = SelectField(choices=[], validators=[DataRequired()])
     submit_loginform = SubmitField("Авторизируйтесь")
 
 
 class RegisterForm(FlaskForm):
-    number_of_phone_regform = StringField("Номер телефона", validators=[DataRequired()])
-    password_regform = PasswordField("Пароль", validators=[DataRequired()])
-    email_regform = StringField("email")
-    fio_regform = StringField("ФИО", validators=[DataRequired()])
+
+    number_of_phone_regform = StringField(validators=[DataRequired()])
+    password_regform = PasswordField(validators=[DataRequired()])
+    email_regform = StringField()
+    fio_regform = StringField()
+    select_role_regform = SelectField(choices=[], validators=[DataRequired()])
     submit_regform = SubmitField("Зарегистрируйтесь")
 
 
 class AddRequestForm(FlaskForm):
-    number_of_flat = SelectField()
-    number_of_building = SelectField()
+
+    number_of_flat = SelectField("Номер квартиры", choices=[])
+    number_of_building = SelectField("Номер дома", choices=[])
     text_of_request = StringField(validators=[DataRequired()])
-    submit = SubmitField()
+    submit = SubmitField("Оставьте заявку")

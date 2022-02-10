@@ -1,10 +1,11 @@
 from app import app
 from flask import render_template, redirect, url_for, flash, g, session
 from app.DataBase import DataBase
-from app.forms import LoginForm, RegisterForm, AddRequestForm
+from app.forms import LoginForm, RegisterForm, AddRequestForm, LoginMoreThanOneForm
 from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
 import psycopg2.errors
+import datetime
 
 
 # Подключение к СУБД через драйвер psycopg2
@@ -48,30 +49,56 @@ def login():
     login_form = LoginForm()
 
     # Проверка на валидацию формы
-    if login_form.validate_on_submit():
-        user = dbase.get_user(login_form.login_loginform.data)
-        admin = dbase.get_admin(login_form.login_loginform.data)
-        print(user)
-        # Проверка на user
-        if user and check_password_hash(user[3], login_form.password_loginform.data):
-            session['loggedin'] = True
-            habitant = dbase.get_habitant(login_form.login_loginform.data)
-            if habitant:
-                session['role'] = "habitant"
-                redirect(url_for('home'))
-            else:
-                worker = dbase.get_worker(login_form.login_loginform.data)
-                if worker:
-                    session['role'] = "worker"
-                    redirect(url_for('home'))
-        # Проверка на admin
-        elif admin and check_password_hash(admin[1], login_form.password_loginform.data):
-            session['loggedin'] = True
-            session['role'] = "admin"
-            return redirect(url_for('home'))
-        else:
-            flash('Такого пользователя не существует')
+    if login_form.submit_loginform.data:
+
+        password = login_form.password_loginform.data
+        users = dbase.get_users_password_on_login(login_form.login_loginform.data)
+
+        if not users:
+
+            flash('Пользователя с таким номером телефона не существует')
             return redirect(url_for('login'))
+
+        elif users:
+
+            users_len = len(users)
+
+            if users_len == 1:
+                password_hash = str(users[0][1])
+
+                if check_password_hash(password_hash, password):
+
+                    session['loggedin'] = True
+                    session['id_of_user'] = users[0][0]
+                    session['id_of_role'] = users[0][2]
+                    return redirect(url_for('home'))
+
+                else:
+
+                    flash('Вы ввели неверный пароль')
+                    return redirect(url_for('login'))
+
+            elif users_len > 1:
+
+                login_more_than_one_form = LoginMoreThanOneForm()
+
+                login_more_than_one_form.select_role_field.choices = \
+                    dbase.get_users_roles_on_login(login_form.login_loginform.data)
+
+                if login_more_than_one_form.validate_on_submit():
+
+                    user = dbase.get_user_on_role_and_phone(login_more_than_one_form.login_loginform.data,
+                                                            login_more_than_one_form.select_role_field.data)
+
+                    if check_password_hash(user[1], login_more_than_one_form.password_loginform.data):
+
+                        session['loggedin'] = True
+                        session['id_of_user'] = user[0]
+                        session['id_of_role'] = user[2]
+                        return redirect(url_for('home'))
+
+                return render_template("login.html", login_more_than_one_form=login_more_than_one_form,
+                                       users_len_more=True)
 
     return render_template("login.html", login_form=login_form)
 
@@ -79,30 +106,65 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     regform = RegisterForm()
+    regform.select_role_regform.choices = dbase.get_roles()
+    print(regform.select_role_regform.choices)
 
     if regform.validate_on_submit():
-        habitant = dbase.get_habitant(regform.number_of_phone_regform.data)
-        if habitant:
-            flash('Такой пользователь уже существует')
+
+        _hashed_password = generate_password_hash(regform.password_regform.data)
+        user = dbase.get_user(regform.number_of_phone_regform.data, regform.select_role_regform.data)
+
+        if user:
+
+            flash('Такой пользователь уже существует!')
+            return redirect(url_for('login'))
+
         else:
-            hashed_password = generate_password_hash(regform.password_regform.data)
-            dbase.add_habitant(regform.number_of_phone_regform.data, regform.email_regform.data,
-                               regform.fio_regform.data, hashed_password)
-            return redirect(url_for('home'))
+
+            dbase.add_user(regform.number_of_phone_regform.data, regform.email_regform.data,
+                           regform.fio_regform.data, _hashed_password, regform.select_role_regform.data)
+
+            if regform.select_role_regform.data == '1':
+
+                users_id = dbase.get_users_id(regform.number_of_phone_regform.data, regform.select_role_regform.data)
+                dbase.add_habitant(users_id[0])
+                return redirect(url_for('login'))
+
     return render_template("register.html", regform=regform)
 
 
-@app.route('/request')
+@app.route('/request', methods=['GET', 'POST'])
 def request():
-#     if session['role'] == "habitant":
-#         # add_request_form = AddRequestForm()
-#         # if add_request_form.submit.data:
-    return render_template("request.html")
+    if 'loggedin' not in session:
+        return redirect(url_for('home'))
+    elif session['role'] == "habitant":
+
+        add_request_form = AddRequestForm()
+
+        add_request_form.number_of_building.choices = dbase.get_all_buildings()
+        add_request_form.number_of_flat.choices = dbase.get_all_flats()
+
+        if add_request_form.validate_on_submit():
+
+            id_of_habitant = session['id_of_habitant']
+            id_of_flat = dbase.get_id_of_flat(add_request_form.number_of_building.data,
+                                              add_request_form.number_of_flat.data)
+            print(id_of_flat)
+            current_datetime = datetime.datetime.now()
+            dbase.add_request(id_of_habitant,
+                              id_of_flat[0],
+                              current_datetime,
+                              add_request_form.text_of_request.data)
+        return render_template("request.html", add_request_form=add_request_form)
+    elif session['role'] == "worker":
+
+        return render_template("request.html")
 
 
 @app.route('/logout')
 def logout():
     session.pop('loggedin', None)
     session.pop('role', None)
+    session.clear()
     flash('Вы вышли из аккаунта')
     return redirect(url_for('home'))

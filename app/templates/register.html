@@ -8,12 +8,22 @@
     <div class="cap-links">
         <a href="{{ url_for('home') }}">Домашняя страница</a>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+     <ul>
+         {% for message in messages %}
+         <li>{{ message }}</li>
+         {% endfor %}
+     </ul>
+    {% endif %}
+    {% endwith %}
     <form action="{{ url_for('register') }}" method="post">
         {{ regform.hidden_tag() }}
         {{ regform.number_of_phone_regform(placeholder="Номер телефона") }}<br>
         {{ regform.password_regform(placeholder="Пароль") }}<br>
         {{ regform.fio_regform(placeholder="ФИО") }}<br>
         {{ regform.email_regform(placeholder="email") }}<br>
+        {{ regform.select_role_regform() }}<br>
         {{ regform.submit_regform }}<br>
     </form>
 </body>

@@ -8,11 +8,31 @@
     <div class="cap-links">
         <a href="{{ url_for('home') }}">Домашняя страница</a>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+     <ul>
+         {% for message in messages %}
+         <li>{{ message }}</li>
+         {% endfor %}
+     </ul>
+    {% endif %}
+    {% endwith %}
+    {% if users_len_more %}
+        <form action="{{ url_for('login') }}" method="post">
+        {{ login_more_than_one_form.hidden_tag() }}<br>
+        {{ login_more_than_one_form.login_loginform() }}<br>
+        {{ login_more_than_one_form.password_loginform() }}<br>
+        {{ login_more_than_one_form.select_role_field() }}<br>
+        {{ login_more_than_one_form.submit_loginform() }}<br>
+        </form>
+    {% endif %}
+    {% if not users_len_more %}
     <form action="{{ url_for('login') }}" method="post">
         {{ login_form.hidden_tag() }}<br>
         {{ login_form.login_loginform() }}<br>
         {{ login_form.password_loginform() }}<br>
         {{ login_form.submit_loginform() }}<br>
     </form>
+    {% endif %}
 </body>
 </html>

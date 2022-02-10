@@ -8,11 +8,20 @@
     <div class="cap-links">
         <a href="{{ url_for('login') }}">Авторизация</a>
         <a href="{{ url_for('register') }}">Регистрация</a>
-        <a href="{{ url_for('request') }}">Оставить заявку</a>
         {% if session['loggedin'] %}
+        <a href="{{ url_for('request') }}">Оставить заявку</a>
         <a href="{{ url_for('logout') }}">Выйти из системы</a>
         {% endif %}
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+     <ul>
+         {% for message in messages %}
+         <li>{{ message }}</li>
+         {% endfor %}
+     </ul>
+    {% endif %}
+    {% endwith %}
     <hr>
     <div>
         <h2>Главная страница</h2>

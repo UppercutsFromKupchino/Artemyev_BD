@@ -9,5 +9,42 @@
         <a href="{{ url_for('home') }}">Домашняя страница</a>
         <a href="{{ url_for('logout') }}">Выйти из системы</a>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+     <ul>
+         {% for message in messages %}
+         <li>{{ message }}</li>
+         {% endfor %}
+     </ul>
+    {% endif %}
+    {% endwith %}
+    {% if session['role'] == "habitant" %}
+        <div class="add-request-div">
+            <form class="add-request-form" action="{{ url_for('request') }}" method="post">
+                {{ add_request_form.hidden_tag() }}
+                {{ add_request_form.number_of_building() }}
+                {{ add_request_form.number_of_flat() }}<br>
+                {{ add_request_form.text_of_request() }}<br>
+                {{ add_request_form.submit() }}
+            </form>
+        </div>
+        <div class="requests-habitant">
+            <table class="table table-hover table-executor table-striped">>
+                <thead>
+                    <tr>
+                        <th scope="col">Номер квартиры</th>
+                        <th scope="col">Номер дома</th>
+                        <th scope="col">Дата заявки</th>
+                        <th scope="col">Текст заявки</th>
+                        <th scope="col">Статус заявки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in range() %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 </body>
 </html>
