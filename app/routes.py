@@ -11,7 +11,11 @@ import datetime
 
 # Подключение к СУБД через драйвер psycopg2
 def connect_db():
-    conn = psycopg2.connect(dbname="Artemyev_BD", user="postgres", password="alp37327", host="localhost")
+    dbname = "dbtfg5sbci8onm"
+    user = "krfwfcoixkstbw"
+    password = "d0a601c99b33a3b98b76325d982a5aa0f7f563bf4c7d66a26e8819578b470d2d"
+    host = "ec2-54-220-243-77.eu-west-1.compute.amazonaws.com"
+    conn = psycopg2.connect(dbname, user, password, host=host)
     return conn
 
 
