@@ -1,17 +1,15 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired
 
 
 class LoginForm(FlaskForm):
-
     login_loginform = StringField(validators=[DataRequired()])
     password_loginform = PasswordField(validators=[DataRequired()])
     submit_loginform = SubmitField("Авторизируйтесь")
 
 
 class LoginMoreThanOneForm(FlaskForm):
-
     login_loginform = StringField(validators=[DataRequired()])
     password_loginform = PasswordField(validators=[DataRequired()])
     select_role_field = SelectField(choices=[], validators=[DataRequired()])
@@ -19,7 +17,6 @@ class LoginMoreThanOneForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-
     number_of_phone_regform = StringField(validators=[DataRequired()])
     password_regform = PasswordField(validators=[DataRequired()])
     email_regform = StringField()
@@ -29,8 +26,24 @@ class RegisterForm(FlaskForm):
 
 
 class AddRequestForm(FlaskForm):
-
     number_of_flat = SelectField("Номер квартиры", choices=[])
-    number_of_building = SelectField("Номер дома", choices=[])
     text_of_request = StringField(validators=[DataRequired()])
     submit = SubmitField("Оставьте заявку")
+
+
+class ChangeStatusOfRequestWorker(FlaskForm):
+    select_status = SelectField(choices=[])
+    hidden_id_of_request = HiddenField()
+    changing_submit = SubmitField("Изменить статус заявки")
+
+
+class ExecuteRequestForWorker(FlaskForm):
+    select_executor = SelectField(choices=[])
+    hidden_id_of_request = HiddenField()
+    changing_submit = SubmitField("Поручить задачу исполнителю")
+
+
+class SelectProfessionForAWorker(FlaskForm):
+    select_worker = SelectField(choices=[])
+    select_profession = SelectField(choices=[])
+    submit = SubmitField("Добавить профессию")

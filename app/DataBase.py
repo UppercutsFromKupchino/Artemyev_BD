@@ -15,7 +15,6 @@ class DataBase:
                                   id_of_role = '{role}'""")
             user = self.__cursor.fetchone()
             return user
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('login'))
@@ -25,7 +24,6 @@ class DataBase:
             self.__cursor.execute(f"""INSERT INTO _user VALUES('{phone}','{email}','{fio}','{password}','{role}')""")
             self.__db.commit()
             flash('Пользователь успешно добавлен')
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('register'))
@@ -35,7 +33,6 @@ class DataBase:
             self.__cursor.execute(f"""INSERT INTO habitant(id_of_habitant) VALUES('{users_id}')""")
             self.__db.commit()
             flash('Житель успешно добавлен')
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('register'))
@@ -44,57 +41,21 @@ class DataBase:
     #     try:
     #         self.__cursor.execute(f"""INSERT INTO worker(id_of_worker, id_of_profession) VALUES()""")
 
-    def get_all_buildings(self, id_habitant):
-        try:
-            self.__cursor.execute(f"""SELECT DISTINCT number_of_building FROM habitant_flat JOIN flat on
-                                      habitant_flat.id_of_flat=flat.id_of_flat
-                                      WHERE id_of_habitant = '{id_habitant}'""")
-            buildings = self.__cursor.fetchall()
-            buildings_list = []
-            buildings_len = len(buildings)
-            for i in range(buildings_len):
-                buildings_list.append(buildings[i][0])
-            buildings = buildings_list
-            return buildings
-
-        except psycopg2.errors:
-            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
-            return redirect(url_for('request'))
-
     def get_all_flats(self, id_habitant):
         try:
-            self.__cursor.execute(f"""SELECT DISTINCT number_of_flat FROM habitant_flat JOIN flat on
-                                      habitant_flat.id_of_flat=flat.id_of_flat
-                                      WHERE id_of_habitant = '{id_habitant}'""")
-            flats = self.__cursor.fetchall()
-            flats_list = []
-            flats_len = len(flats)
-            for i in range(flats_len):
-                flats_list.append(flats[i][0])
-            flats = flats_list
-            return flats
-
-        except psycopg2.errors:
-            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
-            return redirect(url_for('request'))
-
-    def get_id_of_flat(self, building, flat):
-        try:
-            self.__cursor.execute(f"""SELECT id_of_flat FROM flat WHERE number_of_building = '{building}'
-                                      AND number_of_flat = '{flat}'""")
-            id_of_flat = self.__cursor.fetchone()
-            return id_of_flat
-
+            self.__cursor.execute(f"""SELECT number_of_flat FROM habitant_flat WHERE id_of_habitant='{id_habitant}'""")
+            buildings = self.__cursor.fetchall()
+            return buildings
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('request'))
 
     def add_request(self, habitant, flat, date, text):
         try:
-            self.__cursor.execute(f"""INSERT INTO request(id_of_habitant,id_of_flat,datetime_of_request,text_of_request,
-                                      id_of_status) VALUES('{habitant}','{flat}','{date}','{text}','1')""")
+            self.__cursor.execute(f"""INSERT INTO request(id_of_habitant,number_of_flat,datetime_of_request,
+                                      text_of_request,id_of_status)
+                                      VALUES('{habitant}','{flat}','{date}','{text}','1')""")
             self.__db.commit()
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('request'))
@@ -104,7 +65,6 @@ class DataBase:
             self.__cursor.execute(f"""SELECT * FROM role_of_user""")
             roles = self.__cursor.fetchall()
             return roles
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('register'))
@@ -115,7 +75,6 @@ class DataBase:
                                   id_of_role = '{role}'""")
             users_id = self.__cursor.fetchone()
             return users_id
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('register'))
@@ -126,7 +85,6 @@ class DataBase:
                                   WHERE number_of_users_phone = '{phone}'""")
             users = self.__cursor.fetchall()
             return users
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('login'))
@@ -139,7 +97,6 @@ class DataBase:
 
             users_roles = self.__cursor.fetchall()
             return users_roles
-
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('login'))
@@ -153,3 +110,106 @@ class DataBase:
         except psycopg2.errors:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('login'))
+
+    def get_requests_habitant(self, id_habitant):
+        try:
+            self.__cursor.execute(f"""SELECT DISTINCT request.number_of_flat,request.datetime_of_request,
+                                request.text_of_request,status.name_of_status FROM request
+                                JOIN status ON request.id_of_status = status.id_of_status
+                                JOIN habitant_flat ON request.number_of_flat=habitant_flat.number_of_flat
+                                WHERE request.id_of_habitant = '{id_habitant}'""")
+            requests = self.__cursor.fetchall()
+            return requests
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_requests_worker(self, id_worker):
+        try:
+            self.__cursor.execute(f"""SELECT DISTINCT request.number_of_flat,request.datetime_of_request,
+                                request.text_of_request,request.id_of_request,status.name_of_status FROM request
+                                JOIN executor ON request.id_of_request=executor.id_of_request
+                                JOIN status ON request.id_of_status=status.id_of_status
+                                WHERE executor.id_of_worker = '{id_worker}'""")
+            requests = self.__cursor.fetchall()
+            return requests
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_all_statuses(self):
+        try:
+            self.__cursor.execute(f"""SELECT * FROM role_of_user""")
+            roles = self.__cursor.fetchall()
+            return roles
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_workers_admin(self):
+        try:
+            self.__cursor.execute(f"""SELECT worker.id_of_worker,_user.fio_of_user FROM worker
+            JOIN _user ON worker.id_of_worker=_user.id_of_user""")
+            requests = self.__cursor.fetchall()
+            return requests
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_requests_admin(self):
+        try:
+            self.__cursor.execute(f"""SELECT request.number_of_flat,request.datetime_of_request,
+                                       request.text_of_request,request.id_of_request FROM request
+                                       LEFT OUTER JOIN executor ON request.id_of_request=executor.id_of_request
+                                       WHERE executor.id_of_worker is null""")
+            requests = self.__cursor.fetchall()
+            return requests
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_list_of_workers(self):
+        try:
+            self.__cursor.execute("""SELECT _user.fio_of_user,profession.name_of_profession FROM _user
+                                     JOIN worker ON _user.id_of_user=worker.id_of_worker
+                                     JOIN profession ON worker.id_of_profession=profession.id_of_profession""")
+            list_of_workers = self.__cursor.fetchall()
+            return list_of_workers
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def execute_request_admin(self, id_worker, id_request):
+        # try:
+            self.__cursor.execute(f"""INSERT INTO executor VALUES('{id_worker}','{id_request}')""")
+            self.__cursor.execute(f"""UPDATE request SET id_of_status='2' WHERE id_of_request='{id_request}'""")
+            self.__db.commit()
+        # except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))
+
+    def get_list_of_professions(self):
+        try:
+            self.__cursor.execute(f"""SELECT id_of_profession,name_of_profession FROM profession""")
+            professions = self.__cursor.fetchall()
+            return professions
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin'))
+
+    def get_list_of_all_workers(self):
+        try:
+            self.__cursor.execute("""SELECT id_of_user, fio_of_user FROM _user WHERE id_of_role = '2'""")
+            all_workers = self.__cursor.fetchall()
+            return all_workers
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin'))
+
+    def add_profession_for_a_worker(self, id_profession, id_worker):
+        try:
+            self.__cursor.execute(f"""INSERT INTO worker VALUES ('{id_worker}','{id_profession}')""")
+            self.__db.commit()
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin'))

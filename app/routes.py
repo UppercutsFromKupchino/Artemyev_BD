@@ -1,7 +1,8 @@
 from app import app
 from flask import render_template, redirect, url_for, flash, g, session
 from app.DataBase import DataBase
-from app.forms import LoginForm, RegisterForm, AddRequestForm, LoginMoreThanOneForm
+from app.forms import LoginForm, RegisterForm, AddRequestForm, LoginMoreThanOneForm, ChangeStatusOfRequestWorker
+from app.forms import ExecuteRequestForWorker, SelectProfessionForAWorker
 from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
 import psycopg2.errors
@@ -135,30 +136,87 @@ def register():
 
 @app.route('/request', methods=['GET', 'POST'])
 def request():
-    if 'loggedin' not in session:
-        return redirect(url_for('home'))
-    elif session['role'] == "habitant":
+    if 'loggedin' in session:
 
-        add_request_form = AddRequestForm()
+        if session['id_of_role'] == 1:
+            add_request_form = AddRequestForm()
 
-        add_request_form.number_of_building.choices = dbase.get_all_buildings()
-        add_request_form.number_of_flat.choices = dbase.get_all_flats()
+            flats = dbase.get_all_flats(session['id_of_user'])
+            flats_len = len(flats)
+            for i in range(flats_len):
+                add_request_form.number_of_flat.choices.append(flats[i][0])
 
-        if add_request_form.validate_on_submit():
+            requests = dbase.get_requests_habitant(session['id_of_user'])
+            requests_len = len(requests)
 
-            id_of_habitant = session['id_of_habitant']
-            id_of_flat = dbase.get_id_of_flat(add_request_form.number_of_building.data,
-                                              add_request_form.number_of_flat.data)
-            print(id_of_flat)
-            current_datetime = datetime.datetime.now()
-            dbase.add_request(id_of_habitant,
-                              id_of_flat[0],
-                              current_datetime,
-                              add_request_form.text_of_request.data)
-        return render_template("request.html", add_request_form=add_request_form)
-    elif session['role'] == "worker":
+            if add_request_form.validate_on_submit():
 
-        return render_template("request.html")
+                id_of_habitant = session['id_of_user']
+
+                current_datetime = datetime.datetime.now()
+
+                dbase.add_request(id_of_habitant,
+                                  add_request_form.number_of_flat.data,
+                                  current_datetime,
+                                  add_request_form.text_of_request.data)
+
+            return render_template("request.html", add_request_form=add_request_form, requests=requests,
+                                   requests_len=requests_len)
+
+        elif session['id_of_role'] == 2:
+
+            change_status_of_request_worker = ChangeStatusOfRequestWorker()
+
+            requests_worker = dbase.get_requests_worker(session['id_of_user'])
+            requests_len = len(requests_worker)
+
+            change_status_of_request_worker.select_status.choices = dbase.get_all_statuses()
+
+            return render_template("request.html", requests_worker=requests_worker, requests_len=requests_len,
+                                   change_status_of_request_worker=change_status_of_request_worker)
+
+        elif session['id_of_role'] == 3:
+
+            execute_request_for_worker = ExecuteRequestForWorker()
+            workers = dbase.get_workers_admin()
+            print(workers)
+
+            requests = dbase.get_requests_admin()
+            requests_len = len(requests)
+            execute_request_for_worker.select_executor.choices = workers
+
+            list_of_workers = dbase.get_list_of_workers()
+            list_of_workers_len = len(list_of_workers)
+
+            if execute_request_for_worker.changing_submit.data:
+
+                dbase.execute_request_admin(execute_request_for_worker.select_executor.data,
+                                            execute_request_for_worker.hidden_id_of_request.data)
+
+                return redirect(url_for('request'))
+
+            return render_template("request.html", execute_request_for_worker=execute_request_for_worker,
+                                   requests_len=requests_len, requests=requests, list_of_workers=list_of_workers,
+                                   list_of_workers_len=list_of_workers_len)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if 'loggedin' in session:
+        if session['id_of_role'] == 3:
+
+            select_profession_for_a_worker = SelectProfessionForAWorker()
+
+            select_profession_for_a_worker.select_profession.choices = dbase.get_list_of_professions()
+            select_profession_for_a_worker.select_worker.choices = dbase.get_list_of_all_workers()
+
+            if select_profession_for_a_worker.submit.data:
+
+                dbase.add_profession_for_a_worker(select_profession_for_a_worker.select_profession.data,
+                                                  select_profession_for_a_worker.select_worker.data)
+                return redirect(url_for('admin'))
+
+            return render_template("admin.html", select_profession_for_a_worker=select_profession_for_a_worker)
 
 
 @app.route('/logout')

@@ -18,29 +18,123 @@
      </ul>
     {% endif %}
     {% endwith %}
-    {% if session['role'] == "habitant" %}
+    {% if session['id_of_role'] == 1 %}
         <div class="add-request-div">
             <form class="add-request-form" action="{{ url_for('request') }}" method="post">
                 {{ add_request_form.hidden_tag() }}
-                {{ add_request_form.number_of_building() }}
                 {{ add_request_form.number_of_flat() }}<br>
                 {{ add_request_form.text_of_request() }}<br>
                 {{ add_request_form.submit() }}
             </form>
         </div>
+        {% if requests_len > 0 %}
         <div class="requests-habitant">
-            <table class="table table-hover table-executor table-striped">>
+            <table class="table table-hover table-executor table-striped">
                 <thead>
                     <tr>
                         <th scope="col">Номер квартиры</th>
-                        <th scope="col">Номер дома</th>
                         <th scope="col">Дата заявки</th>
                         <th scope="col">Текст заявки</th>
                         <th scope="col">Статус заявки</th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for i in range() %}
+                {% for i in range(requests_len) %}
+                    <tr>
+                        <td>{{ requests[i][0] }}</td>
+                        <td>{{ requests[i][1] }}</td>
+                        <td>{{ requests[i][2] }}</td>
+                        <td>{{ requests[i][3] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif requests_len == 0 %}
+            <p>Нет заявок, ожидающих выполнения</p>
+        {% endif %}
+    {% endif %}
+    {% if session['id_of_role'] == 2 %}
+        {% if requests_len > 0 %}
+        <div class="requests-worker">
+            <table class="table table-hover table-executor table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Номер квартиры</th>
+                        <th scope="col">Дата заявки</th>
+                        <th scope="col">Текст заявки</th>
+                        <th scope="col">Статус заявки</th>
+                        <th scope="col">Изменить статус заявки</th>
+                        <th scope="col">Подтвердить изменения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in range(requests_len) %}
+                    <tr>
+                        <td>{{ requests[i][0] }}</td>
+                        <td>{{ requests[i][1] }}</td>
+                        <td>{{ requests[i][2] }}</td>
+                        <td>{{ requests[i][3] }}</td>
+                        <form action="{{ url_for('request') }}" method="post">
+                            <td>{{ change_status_of_request_worker.select_status() }}</td>
+                            <td>
+                                {{ change_status_of_request_worker.hidden_id_of_request(value=requests[i][4]) }}
+                                {{ change_status_of_request_worker.changing_submit() }}
+                            </td>
+                        </form>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif requests_len == 0 %}
+            <p>Нет заявок, ожидающих вашего выполнения</p>
+        {% endif %}
+    {% endif %}
+    {% if session['id_of_role'] == 3 %}
+    <div class="list-of-workers">
+        <table class="table table-hover table-executor table-striped">
+            <thead>
+                <tr>
+                    <th>ФИО работника</th>
+                    <th>Название профессии</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(list_of_workers_len) %}
+                <tr>
+                    <td>{{ list_of_workers[i][0] }}</td>
+                    <td>{{ list_of_workers[i][1] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="requests-admin">
+            <table class="table table-hover table-executor table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Номер квартиры</th>
+                        <th scope="col">Дата заявки</th>
+                        <th scope="col">Текст заявки</th>
+                        <th scope="col">Выбор исполнителя</th>
+                        <th scope="col">Подтвердить изменения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in range(requests_len) %}
+                    <tr>
+                        <td>{{ requests[i][0] }}</td>
+                        <td>{{ requests[i][1] }}</td>
+                        <td>{{ requests[i][2] }}</td>
+                        <form action="{{ url_for('request') }}" method="post">
+                            <td>{{ execute_request_for_worker.select_executor() }}</td>
+                            <td>
+                                {{ execute_request_for_worker.hidden_id_of_request(value=requests[i][3]) }}
+                                {{ execute_request_for_worker.changing_submit() }}
+                            </td>
+                        </form>
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>
