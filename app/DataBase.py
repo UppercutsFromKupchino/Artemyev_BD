@@ -213,3 +213,31 @@ class DataBase:
         except:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('admin'))
+
+    def get_list_of_flats(self):
+        try:
+            self.__cursor.execute("""SELECT number_of_flat FROM flat""")
+            flats = self.__cursor.fetchall()
+            return flats
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin_flat'))
+
+    def get_list_of_all_habitants(self):
+        try:
+            self.__cursor.execute("""SELECT id_of_user,fio_of_user FROM _user JOIN habitant
+                                  ON _user.id_of_user=habitant.id_of_habitant""")
+            all_habitants = self.__cursor.fetchall()
+            return all_habitants
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin_flat'))
+
+    def add_flat_to_habitant(self, flat, habitant):
+        try:
+            self.__cursor.execute(f"""INSERT INTO habitant_flat VALUES('{habitant}','{flat}')""")
+            self.__db.commit()
+            flash('Пользователь добавлен успешно')
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('admin_flat'))

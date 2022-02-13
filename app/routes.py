@@ -2,7 +2,7 @@ from app import app
 from flask import render_template, redirect, url_for, flash, g, session
 from app.DataBase import DataBase
 from app.forms import LoginForm, RegisterForm, AddRequestForm, LoginMoreThanOneForm, ChangeStatusOfRequestWorker
-from app.forms import ExecuteRequestForWorker, SelectProfessionForAWorker
+from app.forms import ExecuteRequestForWorker, SelectProfessionForAWorker, AddHabitantFlat
 from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
 import psycopg2.errors
@@ -146,6 +146,7 @@ def request():
             add_request_form = AddRequestForm()
 
             flats = dbase.get_all_flats(session['id_of_user'])
+            add_request_form.number_of_flat.choices = dbase.get_all_flats(session['id_of_user'])
             flats_len = len(flats)
             for i in range(flats_len):
                 add_request_form.number_of_flat.choices.append(flats[i][0])
@@ -221,6 +222,41 @@ def admin():
                 return redirect(url_for('admin'))
 
             return render_template("admin.html", select_profession_for_a_worker=select_profession_for_a_worker)
+
+        if session['id_of_role'] != 3:
+            return redirect(url_for('home'))
+
+
+@app.route('/admin_flat', methods=['GET', 'POST'])
+def admin_flat():
+    if 'loggedin' in session:
+        if session['id_of_role'] == 3:
+
+            list_of_flats = dbase.get_list_of_flats()
+            list_of_flats_len = len(list_of_flats)
+            for i in range(list_of_flats_len):
+                list_of_flats[i].append(list_of_flats[i][0])
+            print(list_of_flats)
+            all_habitants = dbase.get_list_of_all_habitants()
+
+            add_habitant_flat = AddHabitantFlat()
+
+            add_habitant_flat.flat.choices = list_of_flats
+            add_habitant_flat.habitant.choices = all_habitants
+            print(add_habitant_flat.flat.choices)
+            print(add_habitant_flat.habitant.choices)
+
+            if add_habitant_flat.submit.data:
+
+                dbase.add_flat_to_habitant(add_habitant_flat.flat.data, add_habitant_flat.habitant.data)
+                return redirect(url_for('admin_flat'))
+
+            return render_template("admin_flat.html", add_habitant_flat=add_habitant_flat)
+
+        elif session['id_of_role'] != 3:
+            return redirect(url_for('home'))
+    else:
+        return redirect(url_for('home'))
 
 
 @app.route('/logout')

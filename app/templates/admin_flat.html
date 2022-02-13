@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a flat to a worker</title>
+</head>
+<body>
+    <div class="cap-links">
+        <a href="{{ url_for('home') }}">Домашняя страница</a>
+        <a href="{{ url_for('logout') }}">Выйти из системы</a>
+    </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+     <ul>
+         {% for message in messages %}
+         <li>{{ message }}</li>
+         {% endfor %}
+     </ul>
+    {% endif %}
+    {% endwith %}
+    <form class="add-habitant-to-flat" action="{{ url_for('admin_flat') }}" method="post">
+        {{ add_habitant_flat.flat() }}
+        {{ add_habitant_flat.habitant() }}
+        {{ add_habitant_flat.submit() }}
+    </form>
+</body>
+</html>

@@ -47,3 +47,9 @@ class SelectProfessionForAWorker(FlaskForm):
     select_worker = SelectField(choices=[])
     select_profession = SelectField(choices=[])
     submit = SubmitField("Добавить профессию")
+
+
+class AddHabitantFlat(FlaskForm):
+    habitant = SelectField(choices=[])
+    flat = SelectField(choices=[])
+    submit = SubmitField("Добавить квартиру жителю")
