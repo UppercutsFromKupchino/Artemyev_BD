@@ -127,7 +127,7 @@ class DataBase:
     def get_requests_worker(self, id_worker):
         try:
             self.__cursor.execute(f"""SELECT DISTINCT request.number_of_flat,request.datetime_of_request,
-                                request.text_of_request,request.id_of_request,status.name_of_status FROM request
+                                request.text_of_request,status.name_of_status,request.id_of_request FROM request
                                 JOIN executor ON request.id_of_request=executor.id_of_request
                                 JOIN status ON request.id_of_status=status.id_of_status
                                 WHERE executor.id_of_worker = '{id_worker}'""")
@@ -139,7 +139,7 @@ class DataBase:
 
     def get_all_statuses(self):
         try:
-            self.__cursor.execute(f"""SELECT * FROM role_of_user""")
+            self.__cursor.execute(f"""SELECT * FROM status""")
             roles = self.__cursor.fetchall()
             return roles
         except:
@@ -241,3 +241,13 @@ class DataBase:
         except:
             flash('Ошибка взаимодействия с базой данных, попробуйте позже')
             return redirect(url_for('admin_flat'))
+
+    def change_status_of_request_worker(self, id_request, id_status):
+        try:
+            self.__cursor.execute(f"""UPDATE request SET id_of_status='{id_status}'
+                                  WHERE id_of_request='{id_request}'""")
+            self.__db.commit()
+            flash('Статус успешно обновлён')
+        except:
+            flash('Ошибка взаимодействия с базой данных, попробуйте позже')
+            return redirect(url_for('request'))

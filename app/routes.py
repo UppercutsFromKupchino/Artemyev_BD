@@ -176,6 +176,12 @@ def request():
 
             change_status_of_request_worker.select_status.choices = dbase.get_all_statuses()
 
+            if change_status_of_request_worker.changing_submit.data:
+
+                dbase.change_status_of_request_worker(change_status_of_request_worker.hidden_id_of_request.data,
+                                                      change_status_of_request_worker.select_status.data)
+                return redirect(url_for('request'))
+
             return render_template("request.html", requests_worker=requests_worker, requests_len=requests_len,
                                    change_status_of_request_worker=change_status_of_request_worker)
 
