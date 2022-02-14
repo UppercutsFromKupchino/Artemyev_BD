@@ -9,6 +9,7 @@
         <a href="{{ url_for('login') }}">Авторизация</a>
         <a href="{{ url_for('register') }}">Регистрация</a>
         {% if session['loggedin'] %}
+        <a href="{{ url_for('admin') }}">Добавить профессию работнику</a>
         <a href="{{ url_for('admin_flat') }}">Добавить квартиру жильцу</a>
         <a href="{{ url_for('request') }}">Оставить заявку</a>
         <a href="{{ url_for('logout') }}">Выйти из системы</a>

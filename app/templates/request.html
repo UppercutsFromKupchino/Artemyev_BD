@@ -71,14 +71,14 @@
                 <tbody>
                 {% for i in range(requests_len) %}
                     <tr>
-                        <td>{{ requests[i][0] }}</td>
-                        <td>{{ requests[i][1] }}</td>
-                        <td>{{ requests[i][2] }}</td>
-                        <td>{{ requests[i][3] }}</td>
+                        <td>{{ requests_worker[i][0] }}</td>
+                        <td>{{ requests_worker[i][1] }}</td>
+                        <td>{{ requests_worker[i][2] }}</td>
+                        <td>{{ requests_worker[i][3] }}</td>
                         <form action="{{ url_for('request') }}" method="post">
                             <td>{{ change_status_of_request_worker.select_status() }}</td>
                             <td>
-                                {{ change_status_of_request_worker.hidden_id_of_request(value=requests[i][4]) }}
+                                {{ change_status_of_request_worker.hidden_id_of_request(value=requests_worker[i][4]) }}
                                 {{ change_status_of_request_worker.changing_submit() }}
                             </td>
                         </form>
