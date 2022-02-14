@@ -145,11 +145,10 @@ def request():
         if session['id_of_role'] == 1:
             add_request_form = AddRequestForm()
 
-            flats = dbase.get_all_flats(session['id_of_user'])
-            add_request_form.number_of_flat.choices = dbase.get_all_flats(session['id_of_user'])
-            flats_len = len(flats)
+            all_flats = dbase.get_all_flats(session['id_of_user'])
+            flats_len = len(all_flats)
             for i in range(flats_len):
-                add_request_form.number_of_flat.choices.append(flats[i][0])
+                add_request_form.number_of_flat.choices.append(all_flats[i][0])
 
             requests = dbase.get_requests_habitant(session['id_of_user'])
             requests_len = len(requests)
